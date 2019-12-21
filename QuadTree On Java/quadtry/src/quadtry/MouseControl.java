@@ -1,0 +1,365 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package quadtry;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.awt.Graphics.*;
+import java.util.Random;
+
+public class MouseControl extends JFrame{
+    
+    private int noktaX;
+    private int noktaY;
+    
+    private int NoktaXS;
+    private int NoktaYS;
+    
+    private int Elips_X1; 
+    private int Elips_Y1;
+    private int Elips_X2;
+    private int Elips_Y2;
+    
+    boolean mouseDragged;
+    boolean mouseClick;
+    int ilk=0;
+    
+    int kontrol=0;
+    int no=0;
+    
+    int x_indis=0;
+    int y_indis=0;
+        
+    int xdizi[]=new int[50]; // x konum dizisi
+    int ydizi[]=new int[50]; // y konum dizisi
+    
+    int secili[][] = new int[50][2];
+    int m_indis=0;
+    int m_kontrol=0;
+    
+    boolean surukle_birak;
+    boolean surukle;
+    int k_satir=50;
+     
+    int numara=65;
+    char c=(char)numara;
+    boolean sil;
+    
+    Random xy=new Random();
+    
+    private JPanel mousepanel;
+    private JLabel status;
+       
+    
+    public MouseControl(){
+        super("QuadTree - Nedret");
+        
+        mousepanel=new JPanel();
+        mousepanel.setBackground(Color.WHITE);
+        add(mousepanel,BorderLayout.CENTER);
+        
+        status=new JLabel("varsayilan");
+        add(status,BorderLayout.SOUTH);
+        
+        HandlerClass handler=new HandlerClass();
+        mousepanel.addMouseListener(handler);
+        mousepanel.addMouseMotionListener(handler);       
+    }
+    private class HandlerClass implements MouseListener, MouseMotionListener{
+    
+        public void mouseClicked (MouseEvent event){
+            
+           
+            Quadtry agac=new Quadtry();            
+            
+            if(SwingUtilities.isLeftMouseButton(event))
+            {
+                mouseClick=true;
+                ilk++;
+                
+            noktaX=event.getX()+10;
+            noktaY=event.getY()+30;
+           
+            xdizi[x_indis]=noktaX;
+            x_indis++; 
+            ydizi[y_indis]=noktaY;
+            y_indis++;
+            
+            agac.ekle(noktaX,noktaY);
+            
+            if(noktaX>410 && noktaX<510 && noktaY>350 && noktaY<400){
+                
+                sil=true;
+            }
+            repaint();                     
+            }           
+           
+            
+            if(SwingUtilities.isRightMouseButton(event))
+            {
+                
+                  mouseClick=true;
+                  ilk++;
+                  
+                  noktaX=xy.nextInt(300);
+                  noktaY=xy.nextInt(300);
+                  
+                  xdizi[x_indis]=noktaX;
+                  x_indis++;
+                  ydizi[y_indis]=noktaY;
+                  y_indis++;
+                           
+                  agac.ekle(noktaX,noktaY);
+                  repaint();
+                  
+            }
+            
+            
+            agac.dolas(agac.root);
+            
+           // status.setText(String.format("nesnenin x ve y konumu: %d %d",noktaX,noktaY));
+        }
+        public void mousePressed(MouseEvent event){
+        
+            status.setText("tiklandi");
+            Elips_X1=event.getX();
+            Elips_Y1=event.getY();
+            mouseDragged=false;
+            if((event.getX()<410 || event.getX()>510) && (event.getY()<350 || event.getY()>400))
+            {
+            surukle=false;
+            }
+            repaint();
+                 
+            
+            
+        }
+        public void mouseReleased(MouseEvent event){
+                  
+            Elips_X2=event.getX();
+            Elips_Y2=event.getY();
+            mouseDragged=true;
+            
+            if((event.getX()<410 || event.getX()>510) && (event.getY()<350 || event.getY()>400))
+            {
+             surukle=true;
+            }
+           
+            repaint();
+            status.setText("tiklamayi biraktin");
+                      
+            
+        }
+        public void mouseEntered(MouseEvent event){
+        
+            status.setText("bolgeye giris yapildi");
+           // mousepanel.setBackground(Color.RED);
+        }
+        public void mouseExited(MouseEvent event){
+            
+            status.setText("cikis yapildi");
+           // mousepanel.setBackground(Color.WHITE);
+        }
+        
+        ///mouse motion listener voids
+        public void mouseDragged(MouseEvent event){
+            status.setText("suruklendi");
+        }
+        public void mouseMoved(MouseEvent event){
+        
+            
+            status.setText("tasidin");
+        }
+    }
+    public void paint(Graphics g){
+    
+       // super.paint(g); // ust uste cizdirir
+       g.setColor(Color.DARK_GRAY);
+       g.drawLine(0,31,400,31);
+       g.drawLine(0, 400, 400,400);
+       g.drawLine(400,0,400,400);
+       g.setColor(Color.BLACK);  
+       
+       
+        surukle_birak=false;
+        int en_yakin_Nx_sagi=400;
+        int en_yakin_Nx_solu=400;
+        int en_yakin_Ny_ustu=400;
+        int en_yakin_Ny_alti=400;
+        
+        int NxSolu=0;
+        int NxSagi=400;
+        int NyUstu=0;
+        int NyAlti=400;
+        
+        g.setColor(Color.ORANGE);
+        g.fillRect(410, 350,100,50);
+        g.setColor(Color.BLACK);
+        g.drawString("TEMIZLE", 435, 375);
+          
+        
+        ///quadtree kurallara uygun hazirlaniyor
+        for (int i = 0; i < x_indis; i++) {
+            
+            if(xdizi[i] > noktaX)
+            {
+                if((xdizi[i]-noktaX) < en_yakin_Nx_sagi)
+                {                    
+                    en_yakin_Nx_sagi=(xdizi[i]-noktaX);
+                    NxSagi=xdizi[i];
+                }
+                
+            }
+            else if(xdizi[i] < noktaX)
+            {
+                if((noktaX-xdizi[i]) < en_yakin_Nx_solu)
+                {
+                    en_yakin_Nx_solu=(noktaX-xdizi[i]);
+                    NxSolu=xdizi[i];
+                }
+            }
+            if(ydizi[i] > noktaY)
+            {
+                if((ydizi[i]-noktaY) < en_yakin_Ny_alti)
+                {
+                    en_yakin_Ny_alti=(ydizi[i]-noktaY);
+                    NyAlti=ydizi[i];
+                }
+            }
+            else if(ydizi[i] < noktaY)
+            {
+                if((noktaY-ydizi[i]) < en_yakin_Ny_ustu)
+                {
+                    en_yakin_Ny_ustu=(noktaY-ydizi[i]);
+                    NyUstu=ydizi[i];
+                }
+            }
+        }
+        
+        if(ilk==1 && mouseClick==true)
+        {
+            if(noktaX<=400 && noktaY<=400 )
+            {
+             g.drawLine(noktaX, 0, noktaX, 400); // x cizdir
+             g.drawLine(0, noktaY, 400, noktaY); // y cizdir
+             
+             g.setColor(Color.BLUE);
+             g.drawString(""+c,noktaX+5,noktaY-5);
+             c++;
+             g.setColor(Color.black);
+             
+             g.drawString("Noktanin X degeri: "+noktaX+" Y degeri: "+noktaY, 410, k_satir);
+             k_satir+=12;
+             mouseClick=false;
+            }
+        }
+              
+        if(mouseClick==true){
+                
+                if(noktaX<=400 &&noktaY<=400){
+                 
+                g.drawLine(NxSolu,noktaY,NxSagi,noktaY);//x
+                g.drawLine(noktaX,NyUstu,noktaX,NyAlti);//y              
+           
+                g.drawString("Noktanin X degeri: "+noktaX+" Y degeri: "+noktaY, 410, k_satir);
+                k_satir+=12;
+             
+                g.setColor(Color.BLUE);
+                g.drawString(""+c,noktaX+5,noktaY-5);
+                c++;
+                g.setColor(Color.black);   
+                }
+        }
+        
+        mouseClick=false;
+        
+        if(mouseDragged){
+        
+            int x,y;
+            int w,h;
+            
+            if(Elips_X1 > Elips_X2){
+            
+                x=Elips_X2;
+                w=Elips_X1-Elips_X2;
+                
+            }else{
+            
+                x=Elips_X1;
+                w=Elips_X2-Elips_X1;
+                
+            }
+            if(Elips_Y1 > Elips_Y2){
+            
+                y=Elips_Y2;
+                h=Elips_Y1-Elips_Y2;
+                
+            }else{
+            
+                y=Elips_Y1;
+                h=Elips_Y2-Elips_Y1;
+                
+            }
+            
+            g.setColor(Color.GREEN);
+            g.drawOval(x, y, w, h);
+            g.setColor(Color.BLUE);
+            surukle_birak=true;
+            int tekrar=0;
+            
+            /// secili koordinatlari belirleme ve yazdirma   
+            if(surukle_birak==true){
+            for (int i = 0; i < 50; i++) {
+               
+                if((x<xdizi[i] && (x+w)>xdizi[i]) && (y<ydizi[i] && (y+h)>ydizi[i]))
+                {
+                    g.setColor(Color.RED);
+                    g.drawLine(xdizi[i]-10, ydizi[i], xdizi[i]+10, ydizi[i]); //x
+                    g.drawLine(xdizi[i], ydizi[i]-10, xdizi[i], ydizi[i]+10); //y              
+                        
+                    secili[m_indis][0]=xdizi[i];
+                    secili[m_indis][1]=ydizi[i];
+                    m_indis++;
+                    
+                }                 
+            } 
+            tekrar=1;
+            }
+            g.drawString("Secililer Listesi:",10, 415);
+            if(tekrar==1 && surukle==true && surukle_birak==true ){
+            int konum=430;
+            for (int i = 0; i <10; i++) { 
+                if(secili[i][0]!=0){
+                    g.setColor(Color.DARK_GRAY);
+                    g.drawString("Secili alan icerisindeki dugumun: X degeri: "+secili[i][0]+" Y degeri: "+secili[i][1], 10, konum);
+                    konum+=12;    
+            }
+            }
+            surukle_birak=false;
+            surukle=false;
+            }   
+            ///temizle islemi
+            if(sil==true){
+                
+                for (int i = 0; i <50; i++) {
+                    if(secili[i][0]!=0){
+                        g.setColor(Color.white);
+                        g.drawLine(0, secili[i][1], 400, secili[i][1]);//x
+                        g.drawLine(secili[i][0],0 , secili[i][0], 400);//y
+                    }
+                    
+                }
+                sil=false;
+            }
+             
+            repaint();  
+            
+            
+        }else{     
+        }
+    }         
+}
